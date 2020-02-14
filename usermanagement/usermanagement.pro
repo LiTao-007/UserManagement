@@ -26,8 +26,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainview.cpp \
-    logindialog.cpp
+    logindialog.cpp \
+    userlogview.cpp \
+    usermanagementview.cpp \
+    adduserview.cpp
 
 HEADERS += \
         mainview.h \
-    logindialog.h
+    logindialog.h \
+    userlogview.h \
+    usermanagementview.h \
+    adduserview.h

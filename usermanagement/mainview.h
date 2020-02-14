@@ -24,6 +24,8 @@
 #include <QComboBox>
 
 #include "logindialog.h"
+#include "userlogview.h"
+#include "usermanagementview.h"
 
 class MainView : public QMainWindow
 {
@@ -35,6 +37,9 @@ public:
 public:
 
     QStackedWidget *stackWidget; //堆栈窗体管理，多界面切换
+
+    UserLogView* user_log;
+    UserManagementView* user_manager;
 
     //工具栏
     QAction *user_manager_Action;
@@ -53,14 +58,6 @@ public:
     QPushButton *outUser_PB;        //用户数据导出
     QPushButton *batchInputUser_PB; //用户信息批量导入
 
-    //用户操作日志
-    QTableView *logTableView;      //用户日志
-    QLineEdit *logUserName_Edit;     //用户名
-    QLineEdit *logPermissionDef_Edit; //操作类型（权限）
-    QComboBox *logLevel_Edit; // 操作等级
-    QDateEdit *logStartDate_Edit;   //时间
-    QDateEdit *logEndDate_Edit;
-
     //登录、权限设置和添加界面对象
     LoginDialog         *LoginView;         //登录
 
@@ -68,7 +65,6 @@ public:
     void CreatStackWidget();
     //数据库相关
     QSqlTableModel* usertableModel;
-    QSqlTableModel* logtableModel;
     QSqlDatabase mydb;
     void MysqlConnect();        //数据库连接
 
