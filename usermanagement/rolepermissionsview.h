@@ -29,6 +29,8 @@
 
 #include "addpermissionsdialog.h"
 #include "addroledialog.h"
+#include "alterroleinfodialog.h"
+#include "alterrolepmsdialog.h"
 
 class RolePermissionsView : public QWidget
 {
@@ -39,6 +41,8 @@ public:
 
     AddPermissionsDialog* AddPermissions_View;
     AddRoleDialog* AddRole_View;
+    AlterRoleInfoDialog* AlterRoleInfo_View;
+    AlterRolePMSDialog* AlterRolePMS_View;
     //角色权限界面控件
     QTableView  *roleTableView;      //角色信息显示表格
     QPushButton *AddRole_pB;         //新增角色

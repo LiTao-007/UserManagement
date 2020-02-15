@@ -7,6 +7,8 @@ RolePermissionsView::RolePermissionsView(QWidget *parent) : QWidget(parent)
     Creat_TabViewMenu();
     AddPermissions_View = new AddPermissionsDialog(this);
     AddRole_View = new AddRoleDialog(this);
+    AlterRoleInfo_View = new AlterRoleInfoDialog(this);
+    AlterRolePMS_View = new AlterRolePMSDialog(this);
 
     connect(AddRole_pB,SIGNAL(clicked(bool)),this,SLOT(on_RoleAddView()));
     connect(AddPermissions_pB,SIGNAL(clicked(bool)),this,SLOT(on_PermissionsAddView()));
@@ -128,11 +130,11 @@ void RolePermissionsView::on_TabViewMenu(QPoint pos){
 
 //修改角色信息
 void RolePermissionsView::on_AlterRoleInfo(){
-
+    AlterRoleInfo_View->show();
 }
 //修改角色权限
 void RolePermissionsView::on_alterPermissions(){
-
+    AlterRolePMS_View->show();
 }
 //删除角色
 void RolePermissionsView::on_deleteRole(){
