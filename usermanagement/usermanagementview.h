@@ -28,6 +28,8 @@
 #include <QModelIndex>
 
 #include "adduserview.h"
+#include "alteruserinfodialog.h"
+#include "alteruserroledialog.h"
 
 class UserManagementView : public QWidget
 {
@@ -50,6 +52,8 @@ public:
     QMenu *popMenu; //菜单
     //界面
     AddUserView* addUser_View;
+    AlterUserInfoDialog* alterUserInfo_View;
+    AlterUserRoleDialog* alterUserRole_View;
     //数据库相关
     QSqlTableModel* usertableModel;
     QSqlDatabase mydb;
@@ -62,7 +66,11 @@ signals:
 public slots:
     void on_UserSearch();
     void on_UserAddView();
+
     void on_TabViewMenu(QPoint pos);//右键菜单响应函数
+    void on_AlterUserInfo();
+    void on_alterUserRole();
+    void on_deleteUser();
 };
 
 #endif // USERMANAGEMENTVIEW_H

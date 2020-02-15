@@ -26,6 +26,7 @@
 #include "logindialog.h"
 #include "userlogview.h"
 #include "usermanagementview.h"
+#include "rolepermissionsview.h"
 
 class MainView : public QMainWindow
 {
@@ -40,6 +41,7 @@ public:
 
     UserLogView* user_log;
     UserManagementView* user_manager;
+    RolePermissionsView* role_permissions;
 
     //工具栏
     QAction *user_manager_Action;

@@ -5,8 +5,11 @@ UserManagementView::UserManagementView(QWidget *parent) : QWidget(parent)
     Creat_UserManageView();
     Creat_TabViewMenu();
     addUser_View = new AddUserView(this);
-    connect(AddUser_pB,SIGNAL(clicked(bool)),this,SLOT(on_UserAddView()));
+    alterUserInfo_View = new AlterUserInfoDialog(this);
+    alterUserRole_View = new AlterUserRoleDialog(this);
 
+    connect(AddUser_pB,SIGNAL(clicked(bool)),this,SLOT(on_UserAddView()));
+    //弹出菜单槽函数
     connect(userTableView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(on_TabViewMenu(QPoint)));
 }
 UserManagementView::~UserManagementView(){
@@ -21,6 +24,10 @@ void UserManagementView::Creat_TabViewMenu(){
     popMenu->addAction(alterUserInfo);
     popMenu->addAction(alterUserRole);
     popMenu->addAction(deleteUser);
+
+    connect(alterUserInfo,SIGNAL(triggered()),this,SLOT(on_AlterUserInfo()));
+    connect(alterUserRole,SIGNAL(triggered()),this,SLOT(on_alterUserRole()));
+    connect(deleteUser,SIGNAL(triggered()),this,SLOT(on_deleteUser()));
 
 }
 //用户管理界面
@@ -135,6 +142,45 @@ void UserManagementView::on_TabViewMenu(QPoint pos){
      }
 #endif
 }
+
+//修改用户基本信息
+void UserManagementView::on_AlterUserInfo(){
+    //获取当前选择行的用户信息
+    QStringList UserInfoList;
+    int row = userTableView->currentIndex().row();
+    qDebug()<< row;
+    int i;
+    for(i = 0; i < 7; i++)
+    {
+        //遍历第row行的所有信息
+        QModelIndex index = usertableModel->index(row,i);
+        QString name = usertableModel->data(index).toString();
+        qDebug()<<name<<" ";
+        UserInfoList<<name;
+    }
+    alterUserInfo_View->userID_Edit->setText(UserInfoList.at(0));
+    alterUserInfo_View->userID_Edit->setReadOnly(true);
+    alterUserInfo_View->userName_Edit->setText(UserInfoList.at(1));
+    alterUserInfo_View->passWorld_Edit->setText(UserInfoList.at(2));
+    alterUserInfo_View->realName_Edit->setText(UserInfoList.at(3));
+    alterUserInfo_View->userTel_Edit->setText(UserInfoList.at(4));
+    alterUserInfo_View->userEmail_Edit->setText(UserInfoList.at(5));
+    alterUserInfo_View->userDec_Edit->setText(UserInfoList.at(6));
+    alterUserInfo_View->show();
+
+    //插入数据库功能后续实现
+}
+
+//修改用户角色
+void UserManagementView::on_alterUserRole(){
+    alterUserRole_View->show();
+}
+
+//删除用户
+void UserManagementView::on_deleteUser(){
+
+}
+
 //新增用户
 void UserManagementView::on_UserAddView(){
     addUser_View->show();

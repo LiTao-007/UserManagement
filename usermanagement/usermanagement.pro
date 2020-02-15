@@ -29,11 +29,21 @@ SOURCES += \
     logindialog.cpp \
     userlogview.cpp \
     usermanagementview.cpp \
-    adduserview.cpp
+    adduserview.cpp \
+    alteruserinfodialog.cpp \
+    alteruserroledialog.cpp \
+    rolepermissionsview.cpp \
+    addroledialog.cpp \
+    addpermissionsdialog.cpp
 
 HEADERS += \
         mainview.h \
     logindialog.h \
     userlogview.h \
     usermanagementview.h \
-    adduserview.h
+    adduserview.h \
+    alteruserinfodialog.h \
+    alteruserroledialog.h \
+    rolepermissionsview.h \
+    addroledialog.h \
+    addpermissionsdialog.h

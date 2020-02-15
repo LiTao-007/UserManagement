@@ -49,26 +49,15 @@ void MainView::CreatTool(){
     connect(login_Action,&QAction::triggered,LoginView,&QDialog::show);
 }
 
-//角色权限管理界面
-QWidget* MainView::Creat_RolePermissionsView(){
-
-    QWidget *userPage = new QWidget;
-    QLabel *titleLabel = new QLabel("角色权限管理界面");
-
-    QVBoxLayout *layoutv= new QVBoxLayout; //垂直布局
-    layoutv->addWidget(titleLabel);
-    userPage->setLayout(layoutv);
-    return userPage;
-}
-
 //多界面切换控制器
 void MainView::CreatStackWidget(){
     stackWidget = new QStackedWidget;
     //QWidget *user_manager = Creat_UserManageView();//用户管理界面
     //QWidget *user_log = Creat_UserLogView();//用户日志界面
-    QWidget *role_permissions = Creat_RolePermissionsView(); //角色权限管理界面
+    //QWidget *role_permissions = Creat_RolePermissionsView(); //角色权限管理界面
     user_log = new UserLogView(this);
     user_manager = new UserManagementView(this);
+    role_permissions = new RolePermissionsView(this);
     stackWidget->addWidget(user_manager);
     stackWidget->addWidget(role_permissions);
     stackWidget->addWidget(user_log);
