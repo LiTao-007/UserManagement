@@ -25,6 +25,7 @@
 #include <QDebug>
 #include <QMessageBox>
 
+
 class UserLogView : public QWidget
 {
     Q_OBJECT

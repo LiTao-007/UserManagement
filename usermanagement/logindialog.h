@@ -14,12 +14,16 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include "userinfo.h"
 
-typedef struct User_info {  //登录用户信息
-    QString nameID;         //用户编号
-    QString name;           //用户名
-    QString permissionID;   //权限
-}UserInfo;
+typedef struct User_Info
+{
+    QString UserID;         //用户编号
+    QString User_Name;      //用户名
+    QString Role_ID;        //角色编号
+    QString Role_Name;      //角色名
+    QStringList PermissionIDList; //角色权限ID列表
+}User;
 
 class LoginDialog : public QDialog
 {
@@ -29,9 +33,10 @@ public:
     ~LoginDialog();
     void MysqlConnect();
 
-    UserInfo User;
+    //User* pUser;
+    UserInfo* pUser;
 
-    bool flag; //用户切换标志
+
     QLabel *nameLabel;
     QLabel *passwordLabel;
     QLineEdit *name_Edit;
@@ -45,6 +50,9 @@ private:
 private slots:
     void on_Login();
     void on_Cancel();
+
+signals:
+    void LoginSignal();
 
 };
 

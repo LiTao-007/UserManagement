@@ -33,6 +33,7 @@ public:
 
     QStandardItemModel* roleModel;
     QTreeView* roleTreeView;
+    QStandardItem* item1; // 权限根节点
 
 signals:
 

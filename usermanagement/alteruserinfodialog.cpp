@@ -8,6 +8,8 @@ AlterUserInfoDialog::AlterUserInfoDialog(QWidget *parent)
     resize(230,350);
 
     alterUser_PB = new QPushButton("修改确认");
+    QLabel *userRole = new QLabel("角色选择");
+    role_Box = new QComboBox;
     QLabel *userID = new QLabel("用户编号");
     userID_Edit = new QLineEdit;
     QLabel *userName = new QLabel("用户名称");
@@ -42,8 +44,11 @@ AlterUserInfoDialog::AlterUserInfoDialog(QWidget *parent)
     gridLayout->addWidget(userEmail,5,0);
     gridLayout->addWidget(userEmail_Edit,5,1);
 
-    gridLayout->addWidget(userDec,6,0);
-    gridLayout->addWidget(userDec_Edit,6,1);
+    gridLayout->addWidget(userRole,6,0);
+    gridLayout->addWidget(role_Box,6,1);
+
+    gridLayout->addWidget(userDec,7,0);
+    gridLayout->addWidget(userDec_Edit,7,1);
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addLayout(gridLayout);

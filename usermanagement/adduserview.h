@@ -15,12 +15,13 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTextEdit>
+#include <QComboBox>
 
 class AddUserView : public QDialog
 {
     Q_OBJECT
 public:
-    AddUserView(QWidget *parent = nullptr);
+    AddUserView(QSqlDatabase Mysqldb,QWidget *parent = nullptr);
     ~AddUserView();
 
     QPushButton *addUser_PB;
@@ -31,6 +32,8 @@ public:
     QLineEdit *userTel_Edit; //tel
     QLineEdit *userEmail_Edit; //email
     QTextEdit *userDec_Edit; //email
+    QComboBox *role_Box; //角色选择
+    QSqlDatabase mydb;
 
 signals:
 

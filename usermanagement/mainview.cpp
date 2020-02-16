@@ -22,7 +22,7 @@ MainView::MainView(QWidget *parent)
 
 MainView::~MainView()
 {
-
+    //UserInfo::FreeSpace();
 }
 
 //工具栏
@@ -41,12 +41,13 @@ void MainView::CreatTool(){
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding); //填充空白
     toolBar->addWidget(spacer);
 
-    login_Action = new QAction("登录/注册", this);//新建登录动作
+    login_Action = new QAction("登录", this);//新建登录动作
     toolBar->addAction(login_Action);
     toolBar->setMovable(false);// 设置工具栏不可移动
 
     LoginView = new LoginDialog(this);
     connect(login_Action,&QAction::triggered,LoginView,&QDialog::show);
+    connect(LoginView,SIGNAL(LoginSignal()),this,SLOT(on_LoginSuccess()));
 }
 
 //多界面切换控制器
@@ -77,7 +78,13 @@ void MainView::on_SwitchPage(){
         stackWidget->setCurrentIndex(2);
 
 }
-
+//更改登录按钮
+void MainView::on_LoginSuccess(){
+    QString loginText;
+    loginText.append(LoginView->pUser->User_Name);
+    loginText.append("/切换");
+    login_Action->setText(loginText);
+}
 /*数据库连接*/
 void MainView::MysqlConnect(){
     if(QSqlDatabase::contains("qt_sql_default_connection"))

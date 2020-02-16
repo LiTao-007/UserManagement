@@ -27,9 +27,11 @@
 #include <QMenu>
 #include <QModelIndex>
 
+#include "userinfo.h"
 #include "adduserview.h"
 #include "alteruserinfodialog.h"
 #include "alteruserroledialog.h"
+
 
 class UserManagementView : public QWidget
 {
@@ -38,6 +40,8 @@ public:
     UserManagementView(QWidget *parent = nullptr);
     ~UserManagementView();
 
+    UserInfo *pUser;
+    QMap<QString,QString> roleMap;
     //用户界面控件
     QTableView *userTableView;      //用户信息显示表格
     QPushButton *AddUser_pB;        //新增用户
@@ -66,6 +70,8 @@ signals:
 public slots:
     void on_UserSearch();
     void on_UserAddView();
+    void on_InsertUserInfoDb();
+    void on_AlterUserInfoDb();
 
     void on_TabViewMenu(QPoint pos);//右键菜单响应函数
     void on_AlterUserInfo();

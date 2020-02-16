@@ -15,6 +15,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QTextEdit>
+#include <QComboBox>
 
 class AlterUserInfoDialog : public QDialog
 {
@@ -30,6 +31,7 @@ public:
     QLineEdit *realName_Edit; //real name
     QLineEdit *userTel_Edit; //tel
     QLineEdit *userEmail_Edit; //email
+    QComboBox *role_Box; //角色选择
     QTextEdit *userDec_Edit; //email
 };
 

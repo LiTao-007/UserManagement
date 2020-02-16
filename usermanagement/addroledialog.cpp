@@ -4,7 +4,7 @@ AddRoleDialog::AddRoleDialog(QWidget *parent) : QDialog(parent)
 {
     setWindowTitle("新增用户"); //窗口名称
     setWindowModality(Qt::ApplicationModal); //阻塞除当前窗体之外的所有的窗体
-    resize(240,360);
+    resize(250,370);
 
     addRole_PB = new QPushButton("确认");
     QLabel *roleID = new QLabel("角色编号");
@@ -24,9 +24,10 @@ AddRoleDialog::AddRoleDialog(QWidget *parent) : QDialog(parent)
 
     roleTreeView = new QTreeView(this);
     roleModel = new QStandardItemModel(roleTreeView);
-    roleModel->setHorizontalHeaderLabels(QStringList()<<QStringLiteral("角色权限"));     //设置列头
-    QStandardItem* item1 = new QStandardItem(QStringLiteral("角色选择权限"));
+    roleModel->setHorizontalHeaderLabels(QStringList()<<QStringLiteral("角色权限选择")<<QStringLiteral(" "));     //设置列头
+    item1 = new QStandardItem(QStringLiteral("权限编号"));
     roleModel->appendRow(item1);
+    roleModel->setItem(roleModel->indexFromItem(item1).row(),1,new QStandardItem(QStringLiteral("权限内容")));
 /*
     QStandardItem* item2 = new QStandardItem(QStringLiteral("超级管理员"));
     item2->setCheckable(true);
@@ -40,7 +41,6 @@ AddRoleDialog::AddRoleDialog(QWidget *parent) : QDialog(parent)
 
     QVBoxLayout *vLayout = new QVBoxLayout;
     vLayout->addLayout(gridLayout);
-
     vLayout->addWidget(roleTreeView);
     vLayout->addWidget(addRole_PB);
     this->setLayout(vLayout);

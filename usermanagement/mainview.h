@@ -36,7 +36,7 @@ public:
     MainView(QWidget *parent = 0);
     ~MainView();
 public:
-
+    //UserInfo* pUser; //登录用户信息
     QStackedWidget *stackWidget; //堆栈窗体管理，多界面切换
 
     UserLogView* user_log;
@@ -61,7 +61,7 @@ public:
     QPushButton *batchInputUser_PB; //用户信息批量导入
 
     //登录、权限设置和添加界面对象
-    LoginDialog         *LoginView;         //登录
+    LoginDialog  *LoginView;         //登录
 
     void CreatTool();           //工具栏操作
     void CreatStackWidget();
@@ -76,6 +76,7 @@ public:
 
 private slots:
     void on_SwitchPage();               //功能界面切换
+    void on_LoginSuccess();
 };
 
 #endif // MAINVIEW_H

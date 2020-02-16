@@ -5,6 +5,9 @@ RolePermissionsView::RolePermissionsView(QWidget *parent) : QWidget(parent)
     Creat_RolePermissionsView();
     MysqlConnect();
     Creat_TabViewMenu();
+    GetPermissionsMap();
+
+    pUser = UserInfo::GetInstance();
     AddPermissions_View = new AddPermissionsDialog(this);
     AddRole_View = new AddRoleDialog(this);
     AlterRoleInfo_View = new AlterRoleInfoDialog(this);
@@ -111,11 +114,61 @@ void RolePermissionsView::Creat_RolePermissionsView(){
 /**************槽函数*****************/
  //新增角色
 void RolePermissionsView::on_RoleAddView(){
+    /*
+    QStandardItem* item2 = new QStandardItem(QStringLiteral("超级管理员"));
+    item2->setCheckable(true);
+    QStandardItem* item3 = new QStandardItem(QStringLiteral("领导"));
+    item3->setCheckable(true);
+    item3->setCheckState(Qt::Checked);
+    item1->appendRow(item2);
+    item1->appendRow(item3);
+    */
+    int num = AddRole_View->item1->rowCount();
+    AddRole_View->item1->removeRows(0,num);
+    QMap<QString, QString>::const_iterator i;
+    for( i=PermissionsMap.constBegin(); i!=PermissionsMap.constEnd(); ++i)
+    {
+        //addUser_View->role_Box->addItem(i.value());
+        QStandardItem* itemchannel = new QStandardItem(QStringLiteral("%1").arg(i.key()));
+        itemchannel->setCheckable(true);
+        AddRole_View->item1->appendRow(itemchannel);
+        AddRole_View->item1->setChild(itemchannel->index().row(),1,new QStandardItem(QStringLiteral("%1").arg(i.value())));
+    }
     AddRole_View->show();
 }
 //新增权限
 void RolePermissionsView::on_PermissionsAddView(){
+    if(!pUser->PermissionIDList.contains("9")){
+        QMessageBox::warning(this,"warning","该用户无该权限!!");
+        return;
+    }
     AddPermissions_View->show();
+    connect(AddPermissions_View->addPermissions_PB,SIGNAL(clicked(bool)),this,SLOT(on_InsertPermissionsDb()));
+}
+
+void RolePermissionsView::on_InsertPermissionsDb(){
+    if(AddPermissions_View->permissionsID_Edit->text().isEmpty()
+            ||AddPermissions_View->permissionsName_Edit->text().isEmpty())
+    {
+        QMessageBox::warning(this,"错误","用户编号、名称和密码不能为空!");
+        return;
+    }
+    //相关数据插入对应数据表中
+    QSqlQuery query(this->mydb);
+    //权限表 tb_user_permission_def
+    QString PermissionsSql = "INSERT INTO tb_user_permission_def VALUE( ";
+    PermissionsSql += AddPermissions_View->permissionsID_Edit->text() +",'";
+    PermissionsSql += AddPermissions_View->permissionsName_Edit->text() +"','";
+    PermissionsSql += AddPermissions_View->permissionsDec_Edit->toPlainText()+"')";
+    if(query.exec(PermissionsSql)){
+        QMessageBox::information(this,"提示","权限新增成功!!");
+        AddPermissions_View->close();
+        GetPermissionsMap();
+        //刷新权限的TreeView
+    }else{
+        QMessageBox::warning(this,"warning",query.lastError().text());
+    }
+
 }
 //右键菜单响应函数
 void RolePermissionsView::on_TabViewMenu(QPoint pos){
@@ -158,7 +211,15 @@ void RolePermissionsView::on_RoleSearch(){
     roletableModel->setFilter(filterStr); //数据库模型查询 过滤器
     roletableModel->select();
 }
-
+void RolePermissionsView::GetPermissionsMap(){
+    PermissionsMap.clear();
+    QSqlQuery query(this->mydb);
+    QString PermissionsSql = "SELECT PERMISSION_ID,PERMISSION_CONTENT,DESCR FROM tb_user_permission_def";
+    query.exec(PermissionsSql);
+    while (query.next()) {
+        PermissionsMap.insert(query.value(0).toString(),query.value(2).toString());
+    }
+}
 /*数据库连接*/
 void RolePermissionsView::MysqlConnect(){
     if(QSqlDatabase::contains("qt_sql_default_connection"))

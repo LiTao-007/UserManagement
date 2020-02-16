@@ -5,17 +5,14 @@ LoginDialog::LoginDialog(QWidget *parent)
 {
     setWindowTitle("登录/注册"); //窗口名称
     setWindowModality(Qt::ApplicationModal); //阻塞除当前窗体之外的所有的窗体
-
-    resize(180,180);
+    pUser = UserInfo::GetInstance();
+    resize(200,180);
     MysqlConnect();
     //用户信息初始化
-    User.name = "登录/注册";
-    User.permissionID = "1";
-
     nameLabel = new QLabel("用户名");
     passwordLabel = new QLabel("密码");
-    name_Edit = new QLineEdit;
-    password_Edit = new QLineEdit;
+    name_Edit = new QLineEdit(this);
+    password_Edit = new QLineEdit(this);
     login_PB = new QPushButton("登录");
     cancel_PB = new QPushButton("取消");
 
@@ -42,7 +39,7 @@ LoginDialog::LoginDialog(QWidget *parent)
 }
 
 LoginDialog::~LoginDialog(){
-
+    delete pUser;
 }
 
 /*
@@ -68,11 +65,40 @@ void LoginDialog::on_Login(){
         QMessageBox::warning(this,"warning","请正确输入用户或密码");
         return;
     }
+    //获取登录用户相关信息
+    //获取用户ID、用户名称
+    pUser->PermissionIDList.clear();
+    while (query.next()) {
+        pUser->UserID = query.value(0).toString();
+        pUser->User_Name = query.value(1).toString();
+    }
+
+    //获取用户角色ID 名称
+    QString  Role_sql1 = "select USER_ID,ROLE_ID from tb_user_owned_role_rec where USER_ID = "+pUser->UserID;
+    query.exec(Role_sql1);
+    while (query.next()) {
+        pUser->Role_ID = query.value(1).toString();
+    }
+
+    QString  Role_sql2 = "select ROLE_ID,ROLE_NAME,DESCR from tb_user_role_def where ROLE_ID = "+pUser->Role_ID;
+    query.exec(Role_sql2);
+    while (query.next()) {
+        pUser->Role_Name = query.value(1).toString();
+    }
+    //角色权限id
+    QString  Permission_sql = "select ROLE_ID,PERMISSION_ID from tb_user_role_permissions_def where ROLE_ID = "+pUser->Role_ID;
+    query.exec(Permission_sql);
+    while (query.next()) {
+        pUser->PermissionIDList.append(query.value(1).toString());
+    }
+   //qDebug()<<User.UserID<<" "<< User.User_Name<<" "<<User.Role_ID<<User.Role_Name<<User.PermissionIDList;
+
 
     qDebug()<< "登录成功 隐藏该界面 跳转至主界面";
     //this->name_Edit->clear();
     this->password_Edit->clear();
     this->close();
+    emit LoginSignal(); //通知登录成功
 }
 
 void LoginDialog::on_Cancel(){

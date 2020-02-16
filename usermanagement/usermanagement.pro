@@ -36,7 +36,8 @@ SOURCES += \
     addroledialog.cpp \
     addpermissionsdialog.cpp \
     alterroleinfodialog.cpp \
-    alterrolepmsdialog.cpp
+    alterrolepmsdialog.cpp \
+    userinfo.cpp
 
 HEADERS += \
         mainview.h \
@@ -50,4 +51,5 @@ HEADERS += \
     addroledialog.h \
     addpermissionsdialog.h \
     alterroleinfodialog.h \
-    alterrolepmsdialog.h
+    alterrolepmsdialog.h \
+    userinfo.h
