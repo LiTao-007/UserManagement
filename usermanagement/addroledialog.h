@@ -29,7 +29,8 @@ public:
     QPushButton *addRole_PB;
     QLineEdit *roleID_Edit; //roleid
     QLineEdit *roleName_Edit; //name
-    QTextEdit *roleDec_Edit; //dec
+    QLineEdit *roleDec_Edit;
+    //QTextEdit *roleDec_Edit; //dec
 
     QStandardItemModel* roleModel;
     QTreeView* roleTreeView;

@@ -27,9 +27,15 @@ public:
     ~AlterRolePMSDialog();
 
     QPushButton *alterPermissions_PB;
+    QLineEdit *roleID_Edit; //roleid
     QLineEdit *roleName_Edit; //name
+    QLineEdit *roleDec_Edit;
+    //QTextEdit *roleDec_Edit; //dec
+
     QStandardItemModel* permissionsModel;
     QTreeView* permissionsTreeView;
+
+    QStandardItem* item1; // 权限根节点
 
 
 };

@@ -12,7 +12,8 @@ AddRoleDialog::AddRoleDialog(QWidget *parent) : QDialog(parent)
     QLabel *roleName = new QLabel("角色名称");
     roleName_Edit = new QLineEdit;
     QLabel *userDec = new QLabel("角色描述");
-    roleDec_Edit = new QTextEdit;
+    //roleDec_Edit = new QTextEdit;
+    roleDec_Edit = new QLineEdit;
 
     QGridLayout *gridLayout = new QGridLayout;
     gridLayout->addWidget(roleID,0,0);

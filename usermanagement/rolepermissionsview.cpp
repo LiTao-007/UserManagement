@@ -34,8 +34,9 @@ void RolePermissionsView::Creat_TabViewMenu(){
     popMenu->addAction(alterPermissions);
     popMenu->addAction(deleteRole);
 
+
     connect(alterRole,SIGNAL(triggered()),this,SLOT(on_AlterRoleInfo()));
-    connect(alterPermissions,SIGNAL(triggered()),this,SLOT(on_alterPermissions()));
+    connect(alterPermissions,SIGNAL(triggered()),this,SLOT(on_alterRole()));
     connect(deleteRole,SIGNAL(triggered()),this,SLOT(on_deleteRole()));
 
 }
@@ -114,17 +115,13 @@ void RolePermissionsView::Creat_RolePermissionsView(){
 /**************槽函数*****************/
  //新增角色
 void RolePermissionsView::on_RoleAddView(){
-    /*
-    QStandardItem* item2 = new QStandardItem(QStringLiteral("超级管理员"));
-    item2->setCheckable(true);
-    QStandardItem* item3 = new QStandardItem(QStringLiteral("领导"));
-    item3->setCheckable(true);
-    item3->setCheckState(Qt::Checked);
-    item1->appendRow(item2);
-    item1->appendRow(item3);
-    */
+    //权限判断
+    if(!pUser->PermissionIDList.contains("7")){
+        QMessageBox::warning(this,"warning","该用户无该权限!!");
+        return;
+    }
     int num = AddRole_View->item1->rowCount();
-    AddRole_View->item1->removeRows(0,num);
+    AddRole_View->item1->removeRows(0,num); //清空子节点
     QMap<QString, QString>::const_iterator i;
     for( i=PermissionsMap.constBegin(); i!=PermissionsMap.constEnd(); ++i)
     {
@@ -135,6 +132,69 @@ void RolePermissionsView::on_RoleAddView(){
         AddRole_View->item1->setChild(itemchannel->index().row(),1,new QStandardItem(QStringLiteral("%1").arg(i.value())));
     }
     AddRole_View->show();
+    connect(AddRole_View->addRole_PB,SIGNAL(clicked(bool)),this,SLOT(on_InsertRoleDb()));
+}
+void RolePermissionsView::on_InsertRoleDb(){
+    QMap<QString, QString> PerIDMap;
+    int PerNum=0;
+    //获取勾选的权限
+    if(AddRole_View->item1->hasChildren()){
+        for(int i = 0;i < AddRole_View->item1->rowCount() ;i++){
+            QStandardItem * childitem = AddRole_View->item1->child(i);
+            //qDebug() << "childitem = " << childitem->text() <<" "<<childitem->checkState();
+            if(childitem->checkState()){
+                QModelIndex index = childitem->index();
+                index = index.sibling(index.row(),1); //第二列内容
+                QString roleDce =AddRole_View->roleTreeView->model()->itemData(index).values()[0].toString();
+                //qDebug()<< roleTableView->model()->itemData(index).values()[0].toString();
+                PerIDMap.insert(childitem->data(0).toString(),roleDce);
+                PerNum++;
+            }
+        }
+    }
+    //相关数据插入对应数据表中
+
+    //角色表 tb_user_role_def
+    QString RoleSql = "INSERT INTO tb_user_role_def VALUE( ";
+    RoleSql += AddRole_View->roleID_Edit->text()+",'";
+    RoleSql += AddRole_View->roleName_Edit->text()+"','";
+    RoleSql += AddRole_View->roleDec_Edit->text() + "')";
+
+    //角色权限表 tb_user_role_permissions_def
+    QString RolePMSSql = "INSERT INTO tb_user_role_permissions_def VALUE(";
+    QMap<QString, QString>::const_iterator itr;
+    for(itr = PerIDMap.constBegin();itr != PerIDMap.constEnd();++itr){
+        RolePMSSql.append(AddRole_View->roleID_Edit->text());
+        RolePMSSql.append(",");
+        RolePMSSql.append(itr.key());
+        RolePMSSql.append(",'");
+        RolePMSSql.append(itr.value());
+        PerNum--;
+        if(PerNum > 0){
+            RolePMSSql.append("'),(");
+        }else {
+            RolePMSSql.append("')");
+            break;
+        }
+    }
+#if 1
+    //执行sql语句
+    QSqlQuery query(this->mydb);
+    query.exec("START TRANSACTION"); //开启事物
+    bool ok1 = query.exec(RoleSql);
+    bool ok2 = query.exec(RolePMSSql);
+    if(ok1&&ok2)
+    {
+        query.exec("COMMIT");  // 提交事物
+    }else{
+        QMessageBox::warning(this,"warning",query.lastError().text());
+        query.exec("ROLLBACK"); //事物回滚
+        return;
+    }
+    QMessageBox::information(this,"提示","角色新增成功!!");
+#endif
+    AddRole_View->close();
+    roletableModel->submitAll();
 }
 //新增权限
 void RolePermissionsView::on_PermissionsAddView(){
@@ -145,7 +205,6 @@ void RolePermissionsView::on_PermissionsAddView(){
     AddPermissions_View->show();
     connect(AddPermissions_View->addPermissions_PB,SIGNAL(clicked(bool)),this,SLOT(on_InsertPermissionsDb()));
 }
-
 void RolePermissionsView::on_InsertPermissionsDb(){
     if(AddPermissions_View->permissionsID_Edit->text().isEmpty()
             ||AddPermissions_View->permissionsName_Edit->text().isEmpty())
@@ -181,17 +240,179 @@ void RolePermissionsView::on_TabViewMenu(QPoint pos){
 #endif
 }
 
-//修改角色信息
+//修改角色信息 ------和权限修改合并
 void RolePermissionsView::on_AlterRoleInfo(){
+
     AlterRoleInfo_View->show();
 }
-//修改角色权限
-void RolePermissionsView::on_alterPermissions(){
+//修改角色权限和信息
+void RolePermissionsView::on_alterRole(){
+    if(!pUser->PermissionIDList.contains("10")){
+        QMessageBox::warning(this,"warning","该用户无新增用户权限!!");
+        return;
+    }
+    //获取当前选择行的角色信息
+    RoleInfoList.clear();
+    int row = roleTableView->currentIndex().row();
+    qDebug()<< row;
+    int i;
+    for(i = 0; i < 3; i++)
+    {
+        //遍历第row行的所有信息
+        QModelIndex index = roletableModel->index(row,i);
+        QString name = roletableModel->data(index).toString();
+        RoleInfoList<<name;
+    }
+    AlterRolePMS_View->roleID_Edit->setText(RoleInfoList.at(0));
+    AlterRolePMS_View->roleID_Edit->setReadOnly(true);
+    AlterRolePMS_View->roleName_Edit->setText(RoleInfoList.at(1));
+    AlterRolePMS_View->roleDec_Edit->setText(RoleInfoList.at(2));
+
+    //获取选择角色的权限ID
+    QStringList role_PermissionsList;
+    QSqlQuery query(this->mydb);
+    QString RolePerID = "select PERMISSION_ID from tb_user_role_permissions_def where ROLE_ID = "+RoleInfoList.at(0);
+    query.exec(RolePerID);
+    while (query.next()) {
+        role_PermissionsList.append(query.value(0).toString());
+    }
+    //添加子节点
+    int num = AlterRolePMS_View->item1->rowCount();
+    AlterRolePMS_View->item1->removeRows(0,num); //清空子节点
+    QMap<QString, QString>::const_iterator itr;
+    for( itr=PermissionsMap.constBegin(); itr!=PermissionsMap.constEnd(); ++itr)
+    {
+        //addUser_View->role_Box->addItem(i.value());
+        QStandardItem* itemchannel = new QStandardItem(QStringLiteral("%1").arg(itr.key()));
+        itemchannel->setCheckable(true);
+        if(role_PermissionsList.contains(itr.key())){ //角色已有权限勾上
+            itemchannel->setCheckState(Qt::Checked);
+        }
+        AlterRolePMS_View->item1->appendRow(itemchannel);
+        AlterRolePMS_View->item1->setChild(itemchannel->index().row(),1,new QStandardItem(QStringLiteral("%1").arg(itr.value())));
+    }
     AlterRolePMS_View->show();
+    connect(AlterRolePMS_View->alterPermissions_PB,SIGNAL(clicked(bool)),this,SLOT(on_AlterRoleDb()));
 }
+void RolePermissionsView::on_AlterRoleDb(){
+    if(AlterRolePMS_View->roleName_Edit->text().isEmpty())
+    {
+        QMessageBox::warning(this,"错误","角色名称不能为空!");
+        return;
+    }
+    //获取Sql语句
+    QMap<QString, QString> PerIDMap;
+    int PerNum=0;
+    //获取勾选的权限
+    if(AlterRolePMS_View->item1->hasChildren()){
+        for(int i = 0;i < AlterRolePMS_View->item1->rowCount() ;i++){
+            QStandardItem * childitem = AlterRolePMS_View->item1->child(i);
+            //qDebug() << "childitem = " << childitem->text() <<" "<<childitem->checkState();
+            if(childitem->checkState()){
+                QModelIndex index = childitem->index();
+                index = index.sibling(index.row(),1); //第二列内容
+                QString roleDce =AlterRolePMS_View->permissionsTreeView->model()->itemData(index).values()[0].toString();
+                //qDebug()<< roleTableView->model()->itemData(index).values()[0].toString();
+                PerIDMap.insert(childitem->data(0).toString(),roleDce);
+                PerNum++;
+            }
+        }
+    }
+
+    //角色表 tb_user_role_def
+    QString RoleSql = "INSERT INTO tb_user_role_def VALUE( ";
+    RoleSql += AlterRolePMS_View->roleID_Edit->text()+",'";
+    RoleSql += AlterRolePMS_View->roleName_Edit->text()+"','";
+    RoleSql += AlterRolePMS_View->roleDec_Edit->text() + "')";
+
+    //角色权限表 tb_user_role_permissions_def
+    QString RolePMSSql = "INSERT INTO tb_user_role_permissions_def VALUE(";
+    QMap<QString, QString>::const_iterator itr;
+    for(itr = PerIDMap.constBegin();itr != PerIDMap.constEnd();++itr){
+        RolePMSSql.append(AlterRolePMS_View->roleID_Edit->text());
+        RolePMSSql.append(",");
+        RolePMSSql.append(itr.key());
+        RolePMSSql.append(",'");
+        RolePMSSql.append(itr.value());
+        PerNum--;
+        if(PerNum > 0){
+            RolePMSSql.append("'),(");
+        }else {
+            RolePMSSql.append("')");
+            break;
+        }
+    }
+    //删除role
+    QString delRolePerSql = "DELETE FROM tb_user_owned_role_rec WHERE ROLE_ID = "+RoleInfoList.at(0);
+    //删除角色权限
+    QString delRoleSql = "DELETE FROM tb_user_role_def WHERE ROLE_ID = "+RoleInfoList.at(0);
+
+    int choose;
+    choose = QMessageBox::question(this, tr("修改角色"),
+                                   QString(tr("确认修改该角色")),
+                                   QMessageBox::Yes | QMessageBox::No);
+    if (choose== QMessageBox::No)
+     {
+        return;
+     }
+    //执行sql语句
+    QSqlQuery query(this->mydb);
+    //执行sql语句
+    query.exec("START TRANSACTION"); //开启事物
+    bool ok1 = query.exec(delRolePerSql);
+    bool ok2 = query.exec(delRoleSql);
+    bool ok3 = query.exec(RoleSql);
+    bool ok4 = query.exec(RolePMSSql);
+    if(ok1&&ok2&&ok3&&ok4)
+    {
+        query.exec("COMMIT");  // 提交事物
+    }else{
+        QMessageBox::warning(this,"warning",query.lastError().text());
+        query.exec("ROLLBACK"); //事物回滚
+        return;
+    }
+    QMessageBox::information(this,"提示","角色修改成功!!");
+    AlterRolePMS_View->close();
+    roletableModel->submitAll();
+
+}
+
+
 //删除角色
 void RolePermissionsView::on_deleteRole(){
+    if(!pUser->PermissionIDList.contains("8")){
+        QMessageBox::warning(this,"warning","该用户无新增用户权限!!");
+        return;
+    }
 
+    //获取当前选择行的用户信息
+    QStringList RoleInfoList;
+    int row = roleTableView->currentIndex().row();
+    qDebug()<< row;
+    int i;
+    for(i = 0; i < 3; i++)
+    {
+        //遍历第row行的所有信息
+        QModelIndex index = roletableModel->index(row,i);
+        QString name = roletableModel->data(index).toString();
+        RoleInfoList<<name;
+    }
+    int choose;
+    choose = QMessageBox::question(this, tr("删除角色"),
+                                   QString(tr("确认删除该角色")),
+                                   QMessageBox::Yes | QMessageBox::No);
+    if (choose== QMessageBox::No)
+     {
+        return;
+     }
+
+    QSqlQuery query(this->mydb);
+    //用户表 tb_user_owned_role_rec 删除角色用户关系
+    QString delRolePerSql = "DELETE FROM tb_user_owned_role_rec WHERE ROLE_ID = "+RoleInfoList.at(0);
+    query.exec(delRolePerSql);
+    QString delRoleSql = "DELETE FROM tb_user_role_def WHERE ROLE_ID = "+RoleInfoList.at(0);
+    query.exec(delRoleSql);
+    roletableModel->submitAll();
 }
 
 //查询
@@ -211,6 +432,7 @@ void RolePermissionsView::on_RoleSearch(){
     roletableModel->setFilter(filterStr); //数据库模型查询 过滤器
     roletableModel->select();
 }
+
 void RolePermissionsView::GetPermissionsMap(){
     PermissionsMap.clear();
     QSqlQuery query(this->mydb);
