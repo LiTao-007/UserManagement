@@ -15,6 +15,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include "userinfo.h"
+#include "logmodel.h"
 
 typedef struct User_Info
 {
@@ -35,6 +36,7 @@ public:
 
     //User* pUser;
     UserInfo* pUser;
+    LogModel* pLog;
 
 
     QLabel *nameLabel;

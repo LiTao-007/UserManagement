@@ -74,8 +74,10 @@ void MainView::on_SwitchPage(){
         stackWidget->setCurrentIndex(0);
     if(action->text()=="角色权限管理")
         stackWidget->setCurrentIndex(1);
-    if(action->text()=="用户日志")
+    if(action->text()=="用户日志"){
+        user_log->logtableModel->submitAll();
         stackWidget->setCurrentIndex(2);
+    }
 
 }
 //更改登录按钮
@@ -85,22 +87,5 @@ void MainView::on_LoginSuccess(){
     loginText.append("/切换");
     login_Action->setText(loginText);
 }
-/*数据库连接*/
-void MainView::MysqlConnect(){
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-    {
-        mydb = QSqlDatabase::database("qt_sql_default_connection");
-    }else{
-        mydb = QSqlDatabase::addDatabase("QMYSQL");
-    }
-    mydb.setHostName("192.168.8.153");
-    mydb.setDatabaseName("smartwave_db");
-    mydb.setPassword("lonsin");
-    mydb.setUserName("root");
 
-    if(!mydb.open())
-    {
-        QMessageBox::warning(this,"错误",mydb.lastError().text());
-    }
-    return;
-}
+

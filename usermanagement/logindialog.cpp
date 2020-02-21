@@ -5,9 +5,13 @@ LoginDialog::LoginDialog(QWidget *parent)
 {
     setWindowTitle("登录/注册"); //窗口名称
     setWindowModality(Qt::ApplicationModal); //阻塞除当前窗体之外的所有的窗体
-    pUser = UserInfo::GetInstance();
     resize(200,180);
-    MysqlConnect();
+
+    pUser = UserInfo::GetInstance();
+    pLog = LogModel::GetInstance();
+    login_db = pLog->pDb->myDb;
+
+
     //用户信息初始化
     nameLabel = new QLabel("用户名");
     passwordLabel = new QLabel("密码");
@@ -98,6 +102,9 @@ void LoginDialog::on_Login(){
     //this->name_Edit->clear();
     this->password_Edit->clear();
     this->close();
+    //生成日志
+    QString LogDec = "用户登录：" + pUser->User_Name;
+    pLog->InsertUserLogDb(pUser->UserID,4,0,1,LogDec);
     emit LoginSignal(); //通知登录成功
 }
 

@@ -28,6 +28,7 @@
 #include <QModelIndex>
 
 #include "userinfo.h"
+#include "logmodel.h"
 #include "adduserview.h"
 #include "alteruserinfodialog.h"
 #include "alteruserroledialog.h"
@@ -41,6 +42,7 @@ public:
     ~UserManagementView();
 
     UserInfo *pUser;
+    LogModel *pLog;
     QMap<QString,QString> roleMap;
     //用户界面控件
     QTableView *userTableView;      //用户信息显示表格
@@ -62,9 +64,8 @@ public:
     QSqlTableModel* usertableModel;
     QSqlDatabase mydb;
 
-    void MysqlConnect();        //数据库连接
     void Creat_UserManageView();    //用户管理界面
-    void Creat_TabViewMenu(); //右击选项单
+    void Creat_TabViewMenu();       //右击选项单
 signals:
 
 public slots:
@@ -73,7 +74,7 @@ public slots:
     void on_InsertUserInfoDb();
     void on_AlterUserInfoDb();
 
-    void on_TabViewMenu(QPoint pos);//右键菜单响应函数
+    void on_TabViewMenu(QPoint pos);    //右键菜单响应函数
     void on_AlterUserInfo();
     void on_alterUserRole();
     void on_deleteUser();

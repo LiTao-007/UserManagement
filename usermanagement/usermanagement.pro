@@ -37,7 +37,9 @@ SOURCES += \
     addpermissionsdialog.cpp \
     alterroleinfodialog.cpp \
     alterrolepmsdialog.cpp \
-    userinfo.cpp
+    userinfo.cpp \
+    logmodel.cpp \
+    sys_mysqlmodel.cpp
 
 HEADERS += \
         mainview.h \
@@ -52,4 +54,6 @@ HEADERS += \
     addpermissionsdialog.h \
     alterroleinfodialog.h \
     alterrolepmsdialog.h \
-    userinfo.h
+    userinfo.h \
+    logmodel.h \
+    sys_mysqlmodel.h

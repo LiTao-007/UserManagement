@@ -4,8 +4,8 @@ UserManagementView::UserManagementView(QWidget *parent) : QWidget(parent)
 {
     Creat_UserManageView();
     Creat_TabViewMenu();
-    MysqlConnect();
-
+    pLog =  LogModel::GetInstance();
+    mydb = pLog->pDb->myDb;
     pUser = UserInfo::GetInstance();
 
     addUser_View = new AddUserView(mydb,this);
@@ -248,6 +248,10 @@ void UserManagementView::on_AlterUserInfoDb(){
         return;
     }
     QMessageBox::information(this,"提示","用户修改成功!!");
+    //生成日志
+    QString LogDec = "修改用户编号为：" + alterUserInfo_View->userID_Edit->text()+"的用户信息";
+    pLog->InsertUserLogDb(pUser->UserID,4,3,1,LogDec);
+
     alterUserInfo_View->close();
     usertableModel->submitAll();
 }
@@ -294,6 +298,10 @@ void UserManagementView::on_deleteUser(){
     query.exec(UserSql);
     QString RoleSql = "DELETE FROM tb_user_owned_role_rec WHERE USER_ID = "+UserInfoList.at(0);
     query.exec(RoleSql);
+    //生成日志
+    QString LogDec = "删除用户:" + UserInfoList.at(1);
+    pLog->InsertUserLogDb(pUser->UserID,4,2,1,LogDec);
+
     usertableModel->submitAll();
 
 }
@@ -356,25 +364,9 @@ void UserManagementView::on_InsertUserInfoDb(){
         return;
     }
     QMessageBox::information(this,"提示","用户新增成功!!");
+    //生成日志
+    QString LogDec = "新增用户:" + addUser_View->userName_Edit->text();
+    pLog->InsertUserLogDb(pUser->UserID,4,1,1,LogDec);
     addUser_View->close();
     usertableModel->submitAll();
-}
-/*数据库连接*/
-void UserManagementView::MysqlConnect(){
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-    {
-        mydb = QSqlDatabase::database("qt_sql_default_connection");
-    }else{
-        mydb = QSqlDatabase::addDatabase("QMYSQL");
-    }
-    mydb.setHostName("192.168.8.153");
-    mydb.setDatabaseName("smartwave_db");
-    mydb.setPassword("lonsin");
-    mydb.setUserName("root");
-
-    if(!mydb.open())
-    {
-        QMessageBox::warning(this,"错误",mydb.lastError().text());
-    }
-    return;
 }

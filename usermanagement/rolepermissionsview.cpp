@@ -3,11 +3,13 @@
 RolePermissionsView::RolePermissionsView(QWidget *parent) : QWidget(parent)
 {
     Creat_RolePermissionsView();
-    MysqlConnect();
     Creat_TabViewMenu();
     GetPermissionsMap();
 
     pUser = UserInfo::GetInstance();
+    pLog = LogModel::GetInstance();
+    mydb = pLog->pDb->myDb;
+
     AddPermissions_View = new AddPermissionsDialog(this);
     AddRole_View = new AddRoleDialog(this);
     AlterRoleInfo_View = new AlterRoleInfoDialog(this);
@@ -28,14 +30,14 @@ void RolePermissionsView::Creat_TabViewMenu(){
 
     popMenu = new QMenu(roleTableView);
     QAction *deleteRole = new QAction("删除");
-    QAction *alterRole = new QAction("修改角色");
-    QAction *alterPermissions= new QAction("权限修改");
-    popMenu->addAction(alterRole);
+    //QAction *alterRole = new QAction("修改角色");
+    QAction *alterPermissions= new QAction("角色修改");
+    //popMenu->addAction(alterRole);
     popMenu->addAction(alterPermissions);
     popMenu->addAction(deleteRole);
 
 
-    connect(alterRole,SIGNAL(triggered()),this,SLOT(on_AlterRoleInfo()));
+   // connect(alterRole,SIGNAL(triggered()),this,SLOT(on_AlterRoleInfo()));
     connect(alterPermissions,SIGNAL(triggered()),this,SLOT(on_alterRole()));
     connect(deleteRole,SIGNAL(triggered()),this,SLOT(on_deleteRole()));
 
@@ -193,6 +195,9 @@ void RolePermissionsView::on_InsertRoleDb(){
     }
     QMessageBox::information(this,"提示","角色新增成功!!");
 #endif
+    //生成日志
+    QString LogDec = "新增角色:" + AddRole_View->roleName_Edit->text();
+    pLog->InsertUserLogDb(pUser->UserID,4,7,1,LogDec);
     AddRole_View->close();
     roletableModel->submitAll();
 }
@@ -219,14 +224,16 @@ void RolePermissionsView::on_InsertPermissionsDb(){
     PermissionsSql += AddPermissions_View->permissionsID_Edit->text() +",'";
     PermissionsSql += AddPermissions_View->permissionsName_Edit->text() +"','";
     PermissionsSql += AddPermissions_View->permissionsDec_Edit->toPlainText()+"')";
-    if(query.exec(PermissionsSql)){
-        QMessageBox::information(this,"提示","权限新增成功!!");
-        AddPermissions_View->close();
-        GetPermissionsMap();
-        //刷新权限的TreeView
-    }else{
+    if(!query.exec(PermissionsSql)){
         QMessageBox::warning(this,"warning",query.lastError().text());
     }
+    QMessageBox::information(this,"提示","权限新增成功!!");
+    //生成日志
+    QString LogDec = "新增权限:" + AddPermissions_View->permissionsName_Edit->text();
+    pLog->InsertUserLogDb(pUser->UserID,4,9,1,LogDec);
+
+    AddPermissions_View->close();
+    GetPermissionsMap();
 
 }
 //右键菜单响应函数
@@ -243,7 +250,7 @@ void RolePermissionsView::on_TabViewMenu(QPoint pos){
 //修改角色信息 ------和权限修改合并
 void RolePermissionsView::on_AlterRoleInfo(){
 
-    AlterRoleInfo_View->show();
+    //AlterRoleInfo_View->show();
 }
 //修改角色权限和信息
 void RolePermissionsView::on_alterRole(){
@@ -372,6 +379,11 @@ void RolePermissionsView::on_AlterRoleDb(){
         return;
     }
     QMessageBox::information(this,"提示","角色修改成功!!");
+
+    //生成日志
+    QString LogDec = "修改角色:" + AlterRolePMS_View->roleName_Edit->text();
+    pLog->InsertUserLogDb(pUser->UserID,4,10,1,LogDec);
+
     AlterRolePMS_View->close();
     roletableModel->submitAll();
 
@@ -407,11 +419,30 @@ void RolePermissionsView::on_deleteRole(){
      }
 
     QSqlQuery query(this->mydb);
-    //用户表 tb_user_owned_role_rec 删除角色用户关系
-    QString delRolePerSql = "DELETE FROM tb_user_owned_role_rec WHERE ROLE_ID = "+RoleInfoList.at(0);
-    query.exec(delRolePerSql);
+    // tb_user_owned_role_rec 删除角色用户关系
+    QString delRoleUserSql = "DELETE FROM tb_user_owned_role_rec WHERE ROLE_ID = "+RoleInfoList.at(0);
+    // tb_user_role_rec 删除角色
     QString delRoleSql = "DELETE FROM tb_user_role_def WHERE ROLE_ID = "+RoleInfoList.at(0);
-    query.exec(delRoleSql);
+    // tb_user_role_rec 删除角色和权限关系
+    QString delRolePerSql="DELETE FROM tb_user_role_permissions_def WHERE ROLE_ID= "+RoleInfoList.at(0);
+
+    //执行sql语句
+    query.exec("START TRANSACTION"); //开启事物
+    bool ok1 = query.exec(delRoleUserSql);
+    bool ok2 = query.exec(delRoleSql);
+    bool ok3 = query.exec(delRolePerSql);
+    if(ok1&&ok2&&ok3)
+    {
+        query.exec("COMMIT");  // 提交事物
+    }else{
+        QMessageBox::warning(this,"warning",query.lastError().text());
+        query.exec("ROLLBACK"); //事物回滚
+        return;
+    }
+
+    //生成日志
+    QString LogDec = "删除角色:" + RoleInfoList.at(1);
+    pLog->InsertUserLogDb(pUser->UserID,4,8,1,LogDec);
     roletableModel->submitAll();
 }
 
@@ -442,22 +473,4 @@ void RolePermissionsView::GetPermissionsMap(){
         PermissionsMap.insert(query.value(0).toString(),query.value(2).toString());
     }
 }
-/*数据库连接*/
-void RolePermissionsView::MysqlConnect(){
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-    {
-        mydb = QSqlDatabase::database("qt_sql_default_connection");
-    }else{
-        mydb = QSqlDatabase::addDatabase("QMYSQL");
-    }
-    mydb.setHostName("192.168.8.153");
-    mydb.setDatabaseName("smartwave_db");
-    mydb.setPassword("lonsin");
-    mydb.setUserName("root");
 
-    if(!mydb.open())
-    {
-        QMessageBox::warning(this,"错误",mydb.lastError().text());
-    }
-    return;
-}

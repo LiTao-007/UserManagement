@@ -29,6 +29,7 @@
 #include <QMap>
 
 #include "userinfo.h"
+#include "logmodel.h"
 #include "addpermissionsdialog.h"
 #include "addroledialog.h"
 #include "alterroleinfodialog.h"
@@ -49,6 +50,7 @@ public:
     AlterRolePMSDialog* AlterRolePMS_View;
 
     UserInfo *pUser;
+    LogModel *pLog;
 
     //获取修改 当前选择行的角色信息
     QStringList RoleInfoList;
@@ -65,22 +67,22 @@ public:
     QSqlTableModel* roletableModel;
     QSqlDatabase mydb;
 
-    void MysqlConnect();        //数据库连接
-
     void Creat_RolePermissionsView();
-    void Creat_TabViewMenu(); //右击选项单
-    void GetPermissionsMap(); //获取数据库权限列表
+    void Creat_TabViewMenu();           //右击选项单
+    void GetPermissionsMap();           //获取数据库权限列表QMap
 signals:
 
 public slots:
     void on_RoleSearch(); //查询
+
     void on_RoleAddView(); //新增角色
     void on_InsertRoleDb();
+
     void on_PermissionsAddView(); //新增权限
     void on_InsertPermissionsDb();
 
     void on_TabViewMenu(QPoint pos); //右键菜单响应函数
-    void on_AlterRoleInfo();
+    void on_AlterRoleInfo(); //合并到on_alterRole（）
 
     void on_alterRole();
     void on_AlterRoleDb();

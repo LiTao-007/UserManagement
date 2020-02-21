@@ -16,15 +16,15 @@
 #include <QTableWidget>
 #include <QFrame>
 #include <QSqlTableModel>
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
 #include <QHeaderView>
 #include <QDateEdit>
 #include <QComboBox>
 #include <QDebug>
 #include <QMessageBox>
 
+#include "userinfo.h"
+#include "logmodel.h"
+#include "sys_mysqlmodel.h"
 
 class UserLogView : public QWidget
 {
@@ -33,16 +33,17 @@ public:
     UserLogView(QWidget *parent = nullptr);
     ~UserLogView();
 
+    UserInfo *pUser;
+    LogModel *pLog;
+    QSqlDatabase mydb;
+    QSqlTableModel* logtableModel;
+
     QTableView *logTableView;      //用户日志
     QLineEdit *logUserName_Edit;     //用户名
     QLineEdit *logPermissionDef_Edit; //操作类型（权限）
     QComboBox *logLevel_Edit; // 操作等级
     QDateEdit *logStartDate_Edit;   //时间
     QDateEdit *logEndDate_Edit;
-
-    QSqlTableModel* logtableModel;
-    QSqlDatabase mydb;
-    void MysqlConnect();        //数据库连接
     void Creat_UserLogView();
 
 signals:

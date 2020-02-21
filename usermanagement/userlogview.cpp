@@ -3,6 +3,9 @@
 UserLogView::UserLogView(QWidget *parent) : QWidget(parent)
 {
     Creat_UserLogView();
+    pLog    = LogModel::GetInstance();
+    mydb = pLog->pDb->myDb;
+    pUser   = UserInfo::GetInstance();
 }
 
 UserLogView::~UserLogView(){
@@ -84,7 +87,7 @@ void UserLogView::Creat_UserLogView(){
     logTableView->setModel(logtableModel);
     //logTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);//自动适应窗口大小
     logTableView->setSelectionBehavior(QAbstractItemView::SelectRows); //选择整行
-    //logTableView->verticalHeader()->setVisible(false);//隐藏列表头
+    logTableView->verticalHeader()->setVisible(false);//隐藏列表头
     logTableView->horizontalHeader()->setHighlightSections(false); //取消表头的在选中单元格时的高亮状态
     logTableView->setEditTriggers(QAbstractItemView::NoEditTriggers); //表格不可编辑
     logTableView->setSelectionMode(QAbstractItemView::SingleSelection); //只选择一行
@@ -142,24 +145,5 @@ void UserLogView::on_UserLogSearch(){
 
 }
 
-/*数据库连接*/
-void UserLogView::MysqlConnect(){
-    if(QSqlDatabase::contains("qt_sql_default_connection"))
-    {
-        mydb = QSqlDatabase::database("qt_sql_default_connection");
-    }else{
-        mydb = QSqlDatabase::addDatabase("QMYSQL");
-    }
-    mydb.setHostName("192.168.8.153");
-    mydb.setDatabaseName("smartwave_db");
-    mydb.setPassword("lonsin");
-    mydb.setUserName("root");
-
-    if(!mydb.open())
-    {
-        QMessageBox::warning(this,"错误",mydb.lastError().text());
-    }
-    return;
-}
 
 
